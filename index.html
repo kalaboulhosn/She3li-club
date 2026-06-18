@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Club Donate</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Inter:wght@300;400;500;600&display=swap');
+
+  :root {
+    --red: #C0392B;
+    --green: #1A6B3A;
+    --cedar: #8B5E3C;
+    --cream: #FAF7F2;
+    --dark: #111111;
+    --mid: #444;
+    --border: #E0DAD2;
+    --gold: #D4A843;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--cream);
+    color: var(--dark);
+    min-height: 100vh;
+  }
+
+  /* ── PAGES ── */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* ── NAV ── */
+  nav {
+    background: var(--dark);
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .nav-logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 18px;
+    color: #fff;
+    letter-spacing: -0.5px;
+  }
+  .nav-logo span { color: var(--red); }
+  nav button {
+    background: none; border: 1px solid #444;
+    color: #ccc; padding: 6px 14px; border-radius: 4px;
+    font-size: 13px; cursor: pointer; font-family: 'Inter', sans-serif;
+  }
+  nav button:hover { border-color: #888; color: #fff; }
+
+  /* ── HERO ── */
+  .hero {
+    background: var(--dark);
+    color: #fff;
+    padding: 56px 24px 48px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(
+      -45deg,
+      transparent, transparent 40px,
+      rgba(192,57,43,0.06) 40px, rgba(192,57,43,0.06) 41px
+    );
+  }
+  .hero-tag {
+    display: inline-block;
+    background: var(--red);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 2px;
+    margin-bottom: 20px;
+  }
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(32px, 7vw, 60px);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -1px;
+    margin-bottom: 16px;
+    position: relative;
+  }
+  .hero h1 em { color: var(--gold); font-style: normal; }
+  .hero p {
+    font-size: 16px;
+    color: #aaa;
+    max-width: 480px;
+    margin: 0 auto 36px;
+    line-height: 1.7;
+    position: relative;
+  }
+
+  /* Progress bar */
+  .progress-wrap {
+    max-width: 480px;
+    margin: 0 auto;
+    position: relative;
+  }
+  .progress-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: #888;
+    margin-bottom: 8px;
+  }
+  .progress-labels strong { color: #fff; font-size: 20px; font-family: 'Syne', sans-serif; }
+  .progress-bar-bg {
+    background: #222;
+    border-radius: 99px;
+    height: 10px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    border-radius: 99px;
+    background: linear-gradient(90deg, var(--green), var(--gold));
+    transition: width 1s ease;
+  }
+
+  /* ── MAIN CONTENT ── */
+  .main { max-width: 760px; margin: 0 auto; padding: 40px 24px 80px; }
+
+  /* Campaigns */
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--mid);
+    margin-bottom: 16px;
+  }
+
+  .campaigns { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-bottom: 40px; }
+  .campaign-card {
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all .18s;
+    background: #fff;
+    position: relative;
+  }
+  .campaign-card:hover { border-color: var(--cedar); }
+  .campaign-card.selected { border-color: var(--red); background: #fff8f7; }
+  .campaign-card.selected::after {
+    content: '✓';
+    position: absolute; top: 10px; right: 12px;
+    color: var(--red); font-weight: 700;
+  }
+  .campaign-icon { font-size: 24px; margin-bottom: 8px; }
+  .campaign-card h3 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .campaign-card p { font-size: 12px; color: #777; line-height: 1.5; }
+
+  /* Donation form */
+  .form-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px;
+  }
+  .form-card h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 24px;
+  }
+
+  .amount-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .amt-btn {
+    border: 2px solid var(--border);
+    background: none;
+    padding: 12px 8px;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: all .15s;
+  }
+  .amt-btn:hover { border-color: var(--cedar); }
+  .amt-btn.active { border-color: var(--red); background: #fff8f7; color: var(--red); }
+
+  label { display: block; font-size: 13px; font-weight: 500; color: #555; margin-bottom: 6px; }
+  input, select, textarea {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 11px 14px;
+    font-size: 15px;
+    font-family: 'Inter', sans-serif;
+    color: var(--dark);
+    background: var(--cream);
+    margin-bottom: 16px;
+    outline: none;
+    transition: border-color .15s;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--cedar); background: #fff; }
+  textarea { resize: vertical; min-height: 72px; }
+
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  /* Payment methods */
+  .pay-tabs { display: flex; gap: 8px; margin-bottom: 20px; }
+  .pay-tab {
+    flex: 1; border: 2px solid var(--border); background: none;
+    padding: 12px; border-radius: 8px; cursor: pointer;
+    font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500;
+    text-align: center; transition: all .15s;
+  }
+  .pay-tab:hover { border-color: var(--cedar); }
+  .pay-tab.active { border-color: var(--red); background: #fff8f7; color: var(--red); }
+  .pay-tab .pay-icon { font-size: 20px; display: block; margin-bottom: 4px; }
+
+  .pay-info {
+    background: #f9f7f4;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    line-height: 1.7;
+  }
+  .pay-info strong { display: block; font-size: 13px; letter-spacing: .5px; color: var(--mid); margin-bottom: 6px; }
+  .pay-info .copy-row {
+    display: flex; align-items: center; gap: 8px;
+    background: #fff; border: 1px solid var(--border); border-radius: 6px;
+    padding: 8px 12px; margin-top: 8px;
+  }
+  .pay-info .copy-row span { flex: 1; font-family: monospace; font-size: 14px; color: var(--dark); }
+  .copy-btn {
+    background: none; border: none; cursor: pointer; font-size: 16px; padding: 2px;
+  }
+
+  .submit-btn {
+    width: 100%;
+    background: var(--red);
+    color: #fff;
+    border: none;
+    padding: 16px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    font-family: 'Syne', sans-serif;
+    cursor: pointer;
+    letter-spacing: .3px;
+    transition: background .2s;
+  }
+  .submit-btn:hover { background: #a93226; }
+  .submit-btn:disabled { background: #ccc; cursor: not-allowed; }
+
+  /* Donor wall */
+  .donor-wall { margin-top: 48px; }
+  .donor-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .donor-avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: var(--dark); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 15px;
+    flex-shrink: 0;
+  }
+  .donor-info { flex: 1; }
+  .donor-info .donor-name { font-weight: 600; font-size: 14px; }
+  .donor-info .donor-meta { font-size: 12px; color: #888; margin-top: 2px; }
+  .donor-amount { font-family: 'Syne', sans-serif; font-weight: 700; color: var(--green); font-size: 15px; }
+  .donor-msg { font-size: 12px; color: #666; font-style: italic; margin-top: 3px; }
+
+  /* Success banner */
+  .success-banner {
+    display: none;
+    background: var(--green);
+    color: #fff;
+    padding: 16px 24px;
+    border-radius: 8px;
+    margin-bottom: 24px;
+    font-weight: 500;
+    text-align: center;
+  }
+  .success-banner.show { display: block; }
+
+  /* ── ADMIN PAGE ── */
+  .admin-page { max-width: 900px; margin: 0 auto; padding: 32px 24px 80px; }
+  .admin-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 32px;
+  }
+  .admin-header h1 { font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 800; }
+
+  .stats-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; margin-bottom: 36px; }
+  .stat-box {
+    background: #fff; border: 1px solid var(--border);
+    border-radius: 10px; padding: 18px;
+  }
+  .stat-box .stat-label { font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: #999; margin-bottom: 8px; }
+  .stat-box .stat-val { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 800; color: var(--dark); }
+  .stat-box .stat-sub { font-size: 12px; color: #aaa; margin-top: 2px; }
+
+  /* Campaign progress */
+  .camp-progress { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 24px; }
+  .camp-progress h3 { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; margin-bottom: 16px; }
+  .camp-row { margin-bottom: 14px; }
+  .camp-row-header { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; }
+  .camp-row-header span:first-child { font-weight: 500; }
+  .camp-row-header span:last-child { color: var(--green); font-weight: 600; }
+  .mini-bar { background: var(--border); border-radius: 99px; height: 6px; }
+  .mini-bar-fill { height: 100%; border-radius: 99px; background: var(--green); }
+
+  /* Donations table */
+  .table-wrap { background: #fff; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .table-toolbar {
+    padding: 14px 20px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .table-toolbar h3 { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; }
+  .filter-select {
+    border: 1px solid var(--border); border-radius: 6px;
+    padding: 6px 10px; font-size: 13px;
+    background: var(--cream); font-family: 'Inter', sans-serif;
+    cursor: pointer; color: var(--dark);
+    margin-bottom: 0;
+  }
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    text-align: left; padding: 10px 20px;
+    font-size: 11px; font-weight: 600; letter-spacing: 1px;
+    text-transform: uppercase; color: #999;
+    border-bottom: 1px solid var(--border);
+    background: #fafafa;
+  }
+  tbody td { padding: 13px 20px; font-size: 13px; border-bottom: 1px solid #f0ece6; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: #fafafa; }
+  .badge {
+    display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600;
+  }
+  .badge-wish { background: #e8f4fd; color: #1a6b9a; }
+  .badge-omt { background: #fff3cd; color: #856404; }
+  .status-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 5px; background: var(--green); }
+
+  /* Admin login */
+  .login-wrap {
+    max-width: 360px; margin: 80px auto; padding: 0 24px;
+  }
+  .login-card {
+    background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 32px;
+  }
+  .login-card h2 { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; margin-bottom: 6px; }
+  .login-card p { font-size: 13px; color: #888; margin-bottom: 24px; }
+  .login-btn {
+    width: 100%; background: var(--dark); color: #fff; border: none;
+    padding: 13px; border-radius: 6px; font-size: 15px; font-weight: 600;
+    font-family: 'Syne', sans-serif; cursor: pointer;
+  }
+  .login-btn:hover { background: #222; }
+  .login-err { color: var(--red); font-size: 12px; margin-top: 8px; display: none; }
+  .login-err.show { display: block; }
+
+  @media (max-width: 500px) {
+    .field-row { grid-template-columns: 1fr; }
+    .amount-grid { grid-template-columns: repeat(2, 1fr); }
+    .pay-tabs { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">⚽ <span>She3li</span> SC</div>
+  <button id="adminNavBtn" onclick="showAdmin()">Admin ↗</button>
+</nav>
+
+<!-- ═══════════════ DONOR PAGE ═══════════════ -->
+<div id="donorPage" class="page active">
+
+  <div class="hero">
+    <div class="hero-tag">Sports Club · Lebanon</div>
+    <h1>Support Our<br><em>Town's Champions</em></h1>
+    <p>Every donation helps She3li Sporting Club keep our athletes training, competing, and representing Btekhney with pride.</p>
+    <div class="progress-wrap">
+      <div class="progress-labels">
+        <div><strong id="raisedAmt">$0</strong><br>raised</div>
+        <div style="text-align:right"><strong id="donorCount">0</strong><br>donors</div>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
+      </div>
+      <div style="text-align:right;font-size:12px;color:#666;margin-top:6px">Goal: <span id="goalAmt">$5,000</span></div>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <div class="success-banner" id="successBanner">
+      🎉 Thank you! Your donation has been recorded. You'll appear on the donor wall below once confirmed.
+    </div>
+
+    <!-- CAMPAIGNS -->
+    <div class="section-title">Choose a cause</div>
+    <div class="campaigns" id="campaignGrid"></div>
+
+    <!-- FORM -->
+    <div class="form-card">
+      <h2>Make a Donation</h2>
+
+      <label>Amount (USD)</label>
+      <div class="amount-grid" id="amountGrid"></div>
+      <input type="number" id="customAmt" placeholder="Or enter custom amount…" min="1" />
+
+      <div class="field-row">
+        <div>
+          <label>Your Name</label>
+          <input type="text" id="donorName" placeholder="Ali Hassan" />
+        </div>
+        <div>
+          <label>Phone (optional)</label>
+          <input type="tel" id="donorPhone" placeholder="+961 …" />
+        </div>
+      </div>
+
+      <label>Leave a message (optional)</label>
+      <textarea id="donorMsg" placeholder="Go team! 🏆"></textarea>
+
+      <!-- PAYMENT METHOD -->
+      <div id="wishInfo" class="pay-info">
+        <strong>📱 WISHMONEY — HOW TO DONATE</strong>
+        Open WishMoney, send your amount to this number, then click submit below:
+        <div class="copy-row">
+          <span id="wishNum">+961 70 652 566</span>
+          <button class="copy-btn" onclick="copyText('wishNum')" title="Copy">📋</button>
+        </div>
+        <div style="font-size:12px;color:#999;margin-top:8px">Account name: <strong>Jad Hosn</strong> · She3li Sporting Club</div>
+      </div>
+
+      <button class="submit-btn" id="submitBtn" onclick="submitDonation()">Record My Donation →</button>
+    </div>
+
+    <!-- DONOR WALL -->
+    <div class="donor-wall">
+      <div class="section-title">Donor Wall</div>
+      <div id="donorWall"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════ ADMIN LOGIN ═══════════════ -->
+<div id="adminLoginPage" class="page">
+  <div class="login-wrap">
+    <div class="login-card">
+      <h2>Admin Access</h2>
+      <p>Enter the password to manage donations</p>
+      <label>Password</label>
+      <input type="password" id="adminPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')tryLogin()" />
+      <div class="login-err" id="loginErr">Incorrect password. Try again.</div>
+      <br>
+      <button class="login-btn" onclick="tryLogin()">Sign In</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ ADMIN DASHBOARD ═══════════════ -->
+<div id="adminDashPage" class="page">
+  <div class="admin-page">
+    <div class="admin-header">
+      <h1>📊 Donation Dashboard</h1>
+      <button onclick="showDonor()" style="background:none;border:1px solid var(--border);padding:8px 16px;border-radius:6px;cursor:pointer;font-family:Inter,sans-serif;font-size:13px;">← Back to site</button>
+    </div>
+
+    <div class="stats-row" id="statsRow"></div>
+
+    <div class="camp-progress">
+      <h3>Campaign Breakdown</h3>
+      <div id="campBreakdown"></div>
+    </div>
+
+    <div class="table-wrap">
+      <div class="table-toolbar">
+        <h3>All Donations</h3>
+        <select class="filter-select" id="filterCamp" onchange="renderTable()">
+          <option value="">All campaigns</option>
+        </select>
+      </div>
+      <div style="overflow-x:auto">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Name</th>
+              <th>Amount</th>
+              <th>Campaign</th>
+              <th>Method</th>
+              <th>Message</th>
+              <th>Date</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="donationsTbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── CONFIG (edit these) ──────────────────────────────────────────
+const CLUB_NAME    = "She3li Sporting Club";
+const GOAL         = 5000;
+const ADMIN_PASS   = "Btekhney#2026";      // change this!
+const WISH_NUMBER  = "+961 70 652 566"; // your WishMoney number
+const BANK_IBAN    = "LB62 0999 0000 0001 0019 0122 9114"; // your IBAN
+
+const CAMPAIGNS = [
+  { id: "kits",     icon: "👕", name: "Player Kits",      desc: "New jerseys & gear for the 2025 season" },
+  { id: "pitch",    icon: "⚽", name: "Pitch Maintenance", desc: "Resurfacing & marking the field" },
+  { id: "travel",   icon: "🚌", name: "Travel & Fixtures", desc: "Bus transport to away matches" },
+  { id: "youth",    icon: "🌱", name: "Youth Academy",     desc: "Equipment & coaching for kids U-12" },
+  { id: "general",  icon: "❤️", name: "General Fund",      desc: "Goes where the club needs it most" },
+];
+
+const AMOUNTS = [10, 20, 50, 100, 200, 500];
+// ──────────────────────────────────────────────────────────────────
+
+// State
+let donations = JSON.parse(localStorage.getItem('donations') || '[]');
+let selectedCampaign = 'general';
+let selectedAmount   = 50;
+let payMethod        = 'wish';
+
+// ── INIT ──────────────────────────────────────────────────────────
+document.getElementById('wishNum').textContent  = WISH_NUMBER;
+
+function init() {
+  buildCampaigns();
+  buildAmounts();
+  updateHero();
+  renderDonorWall();
+}
+
+function buildCampaigns() {
+  const g = document.getElementById('campaignGrid');
+  g.innerHTML = CAMPAIGNS.map(c => `
+    <div class="campaign-card ${c.id===selectedCampaign?'selected':''}" onclick="selectCampaign('${c.id}',this)">
+      <div class="campaign-icon">${c.icon}</div>
+      <h3>${c.name}</h3>
+      <p>${c.desc}</p>
+    </div>
+  `).join('');
+}
+
+function buildAmounts() {
+  const g = document.getElementById('amountGrid');
+  g.innerHTML = AMOUNTS.map(a => `
+    <button class="amt-btn ${a===selectedAmount?'active':''}" onclick="selectAmt(${a},this)">$${a}</button>
+  `).join('');
+}
+
+function selectCampaign(id, el) {
+  selectedCampaign = id;
+  document.querySelectorAll('.campaign-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function selectAmt(a, el) {
+  selectedAmount = a;
+  document.querySelectorAll('.amt-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('customAmt').value = '';
+}
+
+function selectPayment(method, el) {
+  payMethod = method;
+  document.querySelectorAll('.pay-tab').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('wishInfo').style.display = method==='wish' ? 'block' : 'none';
+  document.getElementById('omtInfo').style.display  = method==='omt'  ? 'block' : 'none';
+}
+
+function getFinalAmt() {
+  const custom = parseFloat(document.getElementById('customAmt').value);
+  return custom > 0 ? custom : selectedAmount;
+}
+
+function updateHero() {
+  const total = donations.reduce((s,d) => s + d.amount, 0);
+  document.getElementById('raisedAmt').textContent = '$' + total.toLocaleString();
+  document.getElementById('donorCount').textContent = donations.length;
+  document.getElementById('goalAmt').textContent = '$' + GOAL.toLocaleString();
+  const pct = Math.min(100, (total / GOAL) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+}
+
+function renderDonorWall() {
+  const wall = document.getElementById('donorWall');
+  const recent = [...donations].reverse().slice(0, 20);
+  if (!recent.length) {
+    wall.innerHTML = '<p style="color:#aaa;font-size:14px;padding:24px 0">Be the first to donate! 🏆</p>';
+    return;
+  }
+  wall.innerHTML = recent.map(d => {
+    const initials = d.name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+    const camp = CAMPAIGNS.find(c=>c.id===d.campaign) || {icon:'❤️',name:'General'};
+    return `
+      <div class="donor-item">
+        <div class="donor-avatar">${initials}</div>
+        <div class="donor-info">
+          <div class="donor-name">${d.name}</div>
+          <div class="donor-meta">${camp.icon} ${camp.name} · ${d.method==='wish'?'WishMoney':'OMT/Bank'} · ${formatDate(d.date)}</div>
+          ${d.message ? `<div class="donor-msg">"${d.message}"</div>` : ''}
+        </div>
+        <div class="donor-amount">+$${d.amount}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function submitDonation() {
+  const name = document.getElementById('donorName').value.trim();
+  if (!name) { alert('Please enter your name.'); return; }
+  const amt = getFinalAmt();
+  if (!amt || amt < 1) { alert('Please select or enter a donation amount.'); return; }
+
+  const record = {
+    id:       Date.now(),
+    name,
+    phone:    document.getElementById('donorPhone').value.trim(),
+    message:  document.getElementById('donorMsg').value.trim(),
+    amount:   amt,
+    campaign: selectedCampaign,
+    method:   payMethod,
+    date:     new Date().toISOString(),
+    status:   'pending'
+  };
+
+  donations.push(record);
+  localStorage.setItem('donations', JSON.stringify(donations));
+
+  // Reset
+  document.getElementById('donorName').value  = '';
+  document.getElementById('donorPhone').value = '';
+  document.getElementById('donorMsg').value   = '';
+  document.getElementById('customAmt').value  = '';
+
+  updateHero();
+  renderDonorWall();
+
+  const banner = document.getElementById('successBanner');
+  banner.classList.add('show');
+  banner.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  setTimeout(() => banner.classList.remove('show'), 6000);
+}
+
+function copyText(elId) {
+  const txt = document.getElementById(elId).textContent;
+  navigator.clipboard.writeText(txt).then(() => alert('Copied: ' + txt));
+}
+
+function formatDate(iso) {
+  const d = new Date(iso);
+  return d.toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'});
+}
+
+// ── NAVIGATION ───────────────────────────────────────────────────
+function showAdmin() {
+  const loggedIn = sessionStorage.getItem('adminLoggedIn');
+  if (loggedIn) { showPage('adminDashPage'); buildAdmin(); }
+  else showPage('adminLoginPage');
+}
+function showDonor() { showPage('donorPage'); }
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+// ── ADMIN LOGIN ──────────────────────────────────────────────────
+function tryLogin() {
+  const pass = document.getElementById('adminPass').value;
+  if (pass === ADMIN_PASS) {
+    sessionStorage.setItem('adminLoggedIn','1');
+    document.getElementById('adminPass').value = '';
+    showPage('adminDashPage');
+    buildAdmin();
+  } else {
+    document.getElementById('loginErr').classList.add('show');
+  }
+}
+
+// ── ADMIN DASHBOARD ──────────────────────────────────────────────
+function buildAdmin() {
+  // Stats
+  const total = donations.reduce((s,d)=>s+d.amount,0);
+  const pct   = Math.round((total/GOAL)*100);
+  const avgDon = donations.length ? Math.round(total/donations.length) : 0;
+
+  document.getElementById('statsRow').innerHTML = `
+    <div class="stat-box"><div class="stat-label">Total Raised</div><div class="stat-val">$${total.toLocaleString()}</div><div class="stat-sub">${pct}% of $${GOAL.toLocaleString()} goal</div></div>
+    <div class="stat-box"><div class="stat-label">Donors</div><div class="stat-val">${donations.length}</div><div class="stat-sub">unique donors</div></div>
+    <div class="stat-box"><div class="stat-label">Avg. Donation</div><div class="stat-val">$${avgDon}</div><div class="stat-sub">per donor</div></div>
+    <div class="stat-box"><div class="stat-label">Remaining</div><div class="stat-val">$${Math.max(0,GOAL-total).toLocaleString()}</div><div class="stat-sub">to reach goal</div></div>
+  `;
+
+  // Campaign breakdown
+  const campBreak = document.getElementById('campBreakdown');
+  campBreak.innerHTML = CAMPAIGNS.map(c => {
+    const campTotal = donations.filter(d=>d.campaign===c.id).reduce((s,d)=>s+d.amount,0);
+    const campPct   = total > 0 ? Math.round((campTotal/total)*100) : 0;
+    return `
+      <div class="camp-row">
+        <div class="camp-row-header">
+          <span>${c.icon} ${c.name}</span>
+          <span>$${campTotal.toLocaleString()} (${campPct}%)</span>
+        </div>
+        <div class="mini-bar"><div class="mini-bar-fill" style="width:${campPct}%"></div></div>
+      </div>
+    `;
+  }).join('');
+
+  // Filter dropdown
+  const filter = document.getElementById('filterCamp');
+  filter.innerHTML = '<option value="">All campaigns</option>' +
+    CAMPAIGNS.map(c=>`<option value="${c.id}">${c.icon} ${c.name}</option>`).join('');
+
+  renderTable();
+}
+
+function renderTable() {
+  const f = document.getElementById('filterCamp').value;
+  const rows = f ? donations.filter(d=>d.campaign===f) : donations;
+  const tbody = document.getElementById('donationsTbody');
+
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#aaa;padding:32px">No donations yet</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = [...rows].reverse().map((d,i) => {
+    const camp = CAMPAIGNS.find(c=>c.id===d.campaign) || {icon:'❤️',name:'General'};
+    const methodBadge = d.method==='wish'
+      ? '<span class="badge badge-wish">WishMoney</span>'
+      : '<span class="badge badge-omt">OMT/Bank</span>';
+    return `
+      <tr>
+        <td style="color:#aaa">${rows.length - i}</td>
+        <td><strong>${d.name}</strong>${d.phone?`<br><span style="color:#aaa;font-size:11px">${d.phone}</span>`:''}</td>
+        <td><strong style="color:var(--green)">$${d.amount}</strong></td>
+        <td>${camp.icon} ${camp.name}</td>
+        <td>${methodBadge}</td>
+        <td style="max-width:180px;color:#666">${d.message || '—'}</td>
+        <td style="color:#888;font-size:12px">${formatDate(d.date)}</td>
+        <td><span class="status-dot"></span>Recorded</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+// ── RUN ──────────────────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>
